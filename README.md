@@ -105,6 +105,18 @@ security:
 
 From now, you can attach a customer pool to any customer.
 
+## Code Quality
+
+### Easy Coding Standard
+```shell
+vendor/bin/ecs check src
+```
+
+### PHPSTAN
+```shell
+vendor/bin/phpstan analyse src
+```
+
 [ico-version]: https://poser.pugx.org/tavy315/sylius-customer-pools-plugin/v/stable
 [ico-unstable-version]: https://poser.pugx.org/tavy315/sylius-customer-pools-plugin/v/unstable
 [ico-license]: https://poser.pugx.org/tavy315/sylius-customer-pools-plugin/license
