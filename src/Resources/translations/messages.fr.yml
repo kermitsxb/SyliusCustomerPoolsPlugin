@@ -1,0 +1,18 @@
+tavy315_sylius_customer_pools:
+    ui:
+        code: Code
+        edit_customer_pool: Modifier le pool de clients
+        name: Nom
+        new_customer_pool: Nouveau pool de clients
+        customer_pools: Pools de clients
+    form:
+        customer_pool: Pool de client
+    validation:
+        code:
+            not_blank: Le code ne doit pas être vide.
+            unique: Le code doit être unique.
+            regex: Le code ne peut être composé que de lettres, de chiffres, de tirets et de caractères de soulignement.
+        name:
+            not_blank: Le nom ne doit pas être vide.
+            min_length: Le nom doit comporter au moins 2 caractères.
+            max_length: Le nom doit comporter au maximum 255 caractères.
