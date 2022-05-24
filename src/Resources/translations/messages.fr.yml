@@ -16,3 +16,5 @@ tavy315_sylius_customer_pools:
             not_blank: Le nom ne doit pas être vide.
             min_length: Le nom doit comporter au moins 2 caractères.
             max_length: Le nom doit comporter au maximum 255 caractères.
+    checker:
+        wrong_channel: Vous devez vous connecter sur channel_hostname.

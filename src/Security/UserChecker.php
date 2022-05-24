@@ -8,32 +8,21 @@ use Sylius\Behat\Service\Setter\ChannelContextSetterInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ShopUserInterface;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Tavy315\SyliusCustomerPoolsPlugin\Model\Customer\CustomerPoolAwareInterface;
 
 final class UserChecker implements UserCheckerInterface
 {
-    private ChannelContextInterface $channelContext;
-
-    private ChannelRepositoryInterface $channelRepository;
-
-    private UserCheckerInterface $userChecker;
-
-    private ChannelContextSetterInterface $channelContextSetter;
-
     public function __construct(
-        ChannelContextInterface $channelContext,
-        ChannelRepositoryInterface $channelRepository,
-        UserCheckerInterface $userChecker,
-        ChannelContextSetterInterface $channelContextSetter,
-    )
-    {
-        $this->channelContext = $channelContext;
-        $this->channelRepository = $channelRepository;
-        $this->userChecker = $userChecker;
-        $this->channelContextSetter = $channelContextSetter;
+        private ChannelContextInterface $channelContext,
+        private ChannelRepositoryInterface $channelRepository,
+        private UserCheckerInterface $userChecker,
+        private TranslatorInterface $translator,
+    ) {
     }
 
     public function checkPreAuth(UserInterface $user): void
@@ -68,13 +57,12 @@ final class UserChecker implements UserCheckerInterface
             $customerChannel = $this->channelRepository->findOneByCode($customerPool->getCode());
             if ($customerChannel === null) {
                 return;
-            } else {
-                if (\empty($customerChannel->getHostname())) {
-                    $this->channelContextSetter->setChannel($customerChannel);
-                } else {
-                    throw new CustomUserMessageAuthenticationException('You need to login on channel_hostname.', [ 'channel_hostname' => $customerChannel->getHostname() ]);
-                }
             }
+
+            throw new CustomUserMessageAuthenticationException(
+                $this->translator->trans('tavy315_sylius_customer_pools.checker.wrong_channel'),
+                [ 'channel_hostname' => !empty($customerChannel->getHostname()) ? $customerChannel->getHostname() : $customerChannel->getName() ]
+            );
         }
     }
 

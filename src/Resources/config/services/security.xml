@@ -10,6 +10,7 @@
             <argument type="service" id="sylius.context.channel" />
             <argument type="service" id="sylius.repository.channel" />
             <argument type="service" id="tavy315_sylius_customer_pools.security.user_checker.inner" />
+            <argument type="service" id="translator.default " />
         </service>
     </services>
 </container>
