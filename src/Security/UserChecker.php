@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tavy315\SyliusCustomerPoolsPlugin\Security;
 
+use Sylius\Behat\Service\Setter\ChannelContextSetterInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ShopUserInterface;
@@ -20,11 +21,19 @@ final class UserChecker implements UserCheckerInterface
 
     private UserCheckerInterface $userChecker;
 
-    public function __construct(ChannelContextInterface $channelContext, ChannelRepositoryInterface $channelRepository, UserCheckerInterface $userChecker)
+    private ChannelContextSetterInterface $channelContextSetter;
+
+    public function __construct(
+        ChannelContextInterface $channelContext,
+        ChannelRepositoryInterface $channelRepository,
+        UserCheckerInterface $userChecker,
+        ChannelContextSetterInterface $channelContextSetter,
+    )
     {
         $this->channelContext = $channelContext;
         $this->channelRepository = $channelRepository;
         $this->userChecker = $userChecker;
+        $this->channelContextSetter = $channelContextSetter;
     }
 
     public function checkPreAuth(UserInterface $user): void
@@ -59,9 +68,13 @@ final class UserChecker implements UserCheckerInterface
             $customerChannel = $this->channelRepository->findOneByCode($customerPool->getCode());
             if ($customerChannel === null) {
                 return;
+            } else {
+                if (\empty($customerChannel->getHostname())) {
+                    $this->channelContextSetter->setChannel($customerChannel);
+                } else {
+                    throw new CustomUserMessageAuthenticationException('You need to login on channel_hostname.', [ 'channel_hostname' => $customerChannel->getHostname() ]);
+                }
             }
-
-            throw new CustomUserMessageAuthenticationException('You need to login on channel_hostname.', [ 'channel_hostname' => $customerChannel->getHostname() ]);
         }
     }
 
