@@ -18,3 +18,4 @@ tavy315_sylius_customer_pools:
             max_length: Name must have at most 255 characters.
     checker:
         wrong_channel: You need to login on channel_hostname.
+        not_found: No channel with current Customer Pool.

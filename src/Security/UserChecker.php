@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Tavy315\SyliusCustomerPoolsPlugin\Model\Customer\CustomerPoolAwareInterface;
+use Tavy315\SyliusCustomerPoolsPlugin\Model\CustomerPoolInterface;
 
 final class UserChecker implements UserCheckerInterface
 {
@@ -54,14 +55,22 @@ final class UserChecker implements UserCheckerInterface
         }
 
         if ($channelCustomerPool->getCode() !== $customerPool->getCode()) {
-            $customerChannel = $this->channelRepository->findOneByCode($customerPool->getCode());
-            if ($customerChannel === null) {
-                return;
+            $channels = $this->channelRepository->findAll();
+
+            foreach ($channels as $channel) {
+                if ($channel instanceof CustomerPoolAwareInterface) {
+                    $customerPoolTmpChannel = $channel->getCustomerPool();
+                    if ($customerPoolTmpChannel instanceof CustomerPoolInterface && $channel->getCustomerPool()->getCode() === $customer->getCustomerPool()->getCode()) {
+                        throw new CustomUserMessageAuthenticationException(
+                            $this->translator->trans('tavy315_sylius_customer_pools.checker.wrong_channel'),
+                            [ 'channel_hostname' => !empty($channel->getHostname()) ? $channel->getHostname() : $channel->getName() ]
+                        );
+                    }
+                }
             }
 
             throw new CustomUserMessageAuthenticationException(
-                $this->translator->trans('tavy315_sylius_customer_pools.checker.wrong_channel'),
-                [ 'channel_hostname' => !empty($customerChannel->getHostname()) ? $customerChannel->getHostname() : $customerChannel->getName() ]
+                $this->translator->trans('tavy315_sylius_customer_pools.checker.not_found'),
             );
         }
     }
